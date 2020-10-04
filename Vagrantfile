@@ -20,13 +20,13 @@ Vagrant.configure("2") do |config|
   # config.vm.box_check_update = false
 
   config.vagrant.plugins = "vagrant-hostsupdater"
-  config.hostsupdater.aliases = ["www.zv-my-site.com"]
+  config.hostsupdater.aliases = ["www.zv-my-site.com", "www.zv-python-time.com"]
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
   config.vm.network "private_network", ip: "192.168.50.11"
-  config.vm.network "forwarded_port", guest: 80, host: 8892
+  config.vm.network "forwarded_port", guest: 80, host: 8893
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -68,17 +68,30 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
 
   config.vm.provision "file", source: "apache/html", destination: "html"
+  config.vm.provision "file", source: "apache/scripts", destination: "scripts"
   config.vm.provision "file", source: "apache/sites-available", destination: "sites-available"
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y apache2
+    apt install -y python3-pip
+    apt-get install -y apache2-dev
+    apt-get install -y libapache2-mod-wsgi
 
     mkdir -p /var/www/hello_world
     cp -r html/index.html /var/www/hello_world/index.html
     cp -r sites-available/hello-world.conf /etc/apache2/sites-available/hello-world.conf
+    cp -r sites-available/python-time.conf /etc/apache2/sites-available/python-time.conf
 
+    #mkdir -p /var/www/python_time
+    # cp -r scripts/get_time.py /usr/lib/cgi-bin/get_time.py
+    mkdir -p /usr/local/www/wsgi-scripts/
+    cp -r scripts/get_time.wsgi /usr/local/www/wsgi-scripts/get_time.wsgi
+    chmod a+x /usr/local/www/wsgi-scripts/get_time.wsgi
+
+    a2enmod wsgi
     a2ensite hello-world.conf
+    a2ensite python-time.conf
     service apache2 restart
   SHELL
 end
