@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
   config.vm.network "private_network", ip: "192.168.50.10"
-  config.vm.network "forwarded_port", guest: 80, host: 8890
+  config.vm.network "forwarded_port", guest: 80, host: 8892
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -65,9 +65,18 @@ Vagrant.configure("2") do |config|
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
 
+  config.vm.provision "file", source: "apache/html", destination: "html"
+  config.vm.provision "file", source: "apache/sites-available", destination: "sites-available"
+
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y apache2
-    service apache2 start
+
+    mkdir -p /var/www/hello_world
+    cp -r html/index.html /var/www/hello_world/index.html
+    cp -r sites-available /etc/apache2/
+
+    a2ensite hello_world.conf
+    service apache2 restart
   SHELL
 end
