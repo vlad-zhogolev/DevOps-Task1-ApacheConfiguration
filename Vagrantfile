@@ -19,11 +19,13 @@ Vagrant.configure("2") do |config|
   # `vagrant box outdated`. This is not recommended.
   # config.vm.box_check_update = false
 
+  config.vagrant.plugins = "vagrant-hostsupdater"
+  config.hostsupdater.aliases = ["www.zv-my-site.com"]
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  config.vm.network "private_network", ip: "192.168.50.10"
+  config.vm.network "private_network", ip: "192.168.50.11"
   config.vm.network "forwarded_port", guest: 80, host: 8892
 
   # Create a forwarded port mapping which allows access to a specific port
@@ -74,9 +76,9 @@ Vagrant.configure("2") do |config|
 
     mkdir -p /var/www/hello_world
     cp -r html/index.html /var/www/hello_world/index.html
-    cp -r sites-available /etc/apache2/
+    cp -r sites-available/hello-world.conf /etc/apache2/sites-available/hello-world.conf
 
-    a2ensite hello_world.conf
+    a2ensite hello-world.conf
     service apache2 restart
   SHELL
 end
